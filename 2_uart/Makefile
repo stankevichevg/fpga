@@ -2,23 +2,33 @@ BOARD=tangnano9k
 FAMILY=GW1N-9C
 DEVICE=GW1NR-LV9QN88PC6/I5
 
-all: counter.fs
+all: uat.fs
 
 # Synthesis
-counter.json: counter.v
-	yosys -p "read_verilog counter.v; synth_gowin -top counter -json counter.json"
+uart.json: uart.v
+	yosys -p "read_verilog uart.v; synth_gowin -top uart -json uart.json"
 
 # Place and Route
-counter_pnr.json: counter.json
-	nextpnr-gowin --json counter.json --write counter_pnr.json --freq 27 --device ${DEVICE} --family ${FAMILY} --cst ${BOARD}.cst
+uart_pnr.json: uart.json
+	nextpnr-gowin --json uart.json --write uart_pnr.json --freq 27 --device ${DEVICE} --family ${FAMILY} --cst ${BOARD}.cst
 
 # Generate Bitstream
-counter.fs: counter_pnr.json
-	gowin_pack -d ${FAMILY} -o counter.fs counter_pnr.json
+uart.fs: uart_pnr.json
+	gowin_pack -d ${FAMILY} -o uart.fs uart_pnr.json
 
 # Program Board
-load: counter.fs
-	openFPGALoader -b ${BOARD} counter.fs -f
+load: uart.fs
+	openFPGALoader -b ${BOARD} uart.fs -f
+
+uart_test.o: uart.v uart_tb.v
+	iverilog -o uart_test.o -s test uart.v uart_tb.v
+
+test: uart_test.o
+	vvp uart_test.o
+
+# Cleanup build artifacts
+clean:
+	rm uart.vcd uart.fs uart_test.o
 
 .PHONY: load
-.INTERMEDIATE: counter_pnr.json counter.json
+.INTERMEDIATE: uart_pnr.json uart.json

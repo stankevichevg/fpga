@@ -31,7 +31,7 @@ module test();
     #16 uart_rx=1;
     #4 btn=0;
     #4 btn=1;
-    #3000 $finish;
+    #1000 $finish;
   end
 
   initial begin
