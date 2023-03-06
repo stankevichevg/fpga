@@ -21,7 +21,7 @@ load: div_clock.fs
 	openFPGALoader -b ${BOARD} div_clock.fs -f
 
 div_clock_test.o: div_clock.v div_clock_tb.v
-	iverilog -o div_clock_test.o -s div_clock_test div_clock.v div_clock_tb.v
+	iverilog -o div_clock_test.o -s div_clock_test div_clock.v clock_counter.v div_clock_tb.v
 
 test: div_clock_test.o
 	vvp div_clock_test.o
